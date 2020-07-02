@@ -31,31 +31,33 @@ class VRActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        if (Build.VERSION.SDK_INT > 23) {
+        if (isSupportedMultiWindow()) {
             initializePlayer()
         }
     }
 
     override fun onResume() {
         super.onResume()
-        if ((Build.VERSION.SDK_INT <= 23 || player == null)) {
+        if ((isSupportedMultiWindow() || player == null)) {
             initializePlayer()
         }
     }
 
     override fun onPause() {
         super.onPause()
-        if (Build.VERSION.SDK_INT <= 23) {
+        if (!isSupportedMultiWindow()) {
             releasePlayer()
         }
     }
 
     override fun onStop() {
         super.onStop()
-        if (Build.VERSION.SDK_INT > 23) {
+        if (isSupportedMultiWindow()) {
             releasePlayer()
         }
     }
+
+    private fun isSupportedMultiWindow() = Build.VERSION.SDK_INT > 23
 
     private fun buildMediaSource(uri: Uri): MediaSource {
         val dataSourceFactory = DefaultDataSourceFactory(this, "javiermarsicano-VR-app")
@@ -65,7 +67,9 @@ class VRActivity : AppCompatActivity() {
     }
 
     private fun initializePlayer() {
-        player = SimpleExoPlayer.Builder(this).build()
+        if (player == null) {
+            player = SimpleExoPlayer.Builder(this).build()
+        }
 
         val uri = Uri.parse("https://storage.googleapis.com/exoplayer-test-media-1/360/congo.mp4")
         val mediaSource = buildMediaSource(uri)
